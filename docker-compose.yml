@@ -1,0 +1,132 @@
+version: "3"
+services:
+  zookeeper:
+    image: zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    image: confluentinc/cp-kafka
+    ports:
+      - 29092:29092
+    depends_on:
+      - "zookeeper"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://192.168.0.10:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: imaginfolio
+      POSTGRES_USER: imaginfolio
+      POSTGRES_DB: imaginfolio
+    volumes:
+      - "$PWD/postgresData/imaginfolio:/var/lib/postgresql/data"
+      - "$PWD/importPostgres:/data"
+  lb:
+    image: haproxy
+    depends_on: ["imaginfolio1","imaginfolio2","imaginfolio3","imaginfolio4"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./haproxy:/usr/local/etc/haproxy
+  imaginfolio1:
+    image: imaginfolio
+    depends_on: ["kafka"]
+    environment:
+      PORT: 1111
+      PGHOST: postgres
+      PGUSER: imaginfolio
+      PGDATABASE: imaginfolio
+      PGPASSWORD: imaginfolio
+      PGPOST: 5432
+      JWT_SECRET: "imaginfolio"
+      JWT_EXPIRES: 24h
+      BROKERS_LIST: kafka:9092
+      POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
+    volumes:
+      - ./TEMP:/app/UPLOAD_DATA
+  imaginfolio2:
+    image: imaginfolio
+    depends_on: ["kafka"]
+    environment:
+      PORT: 2222
+      PGHOST: postgres
+      PGUSER: imaginfolio
+      PGDATABASE: imaginfolio
+      PGPASSWORD: imaginfolio
+      PGPOST: 5432
+      JWT_SECRET: "imaginfolio"
+      JWT_EXPIRES: 24h
+      BROKERS_LIST: kafka:9092
+      POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
+  imaginfolio3:
+    image: imaginfolio
+    depends_on: ["kafka"]
+    environment:
+      PORT: 3333
+      PGHOST: postgres
+      PGUSER: imaginfolio
+      PGDATABASE: imaginfolio
+      PGPASSWORD: imaginfolio
+      PGPOST: 5432
+      JWT_SECRET: "imaginfolio"
+      JWT_EXPIRES: 24h
+      BROKERS_LIST: kafka:9092
+      POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
+    volumes:
+      - ./TEMP:/app/UPLOAD_DATA
+  imaginfolio4:
+    image: imaginfolio
+    depends_on: ["kafka"]
+    environment:
+      PORT: 4444
+      PGHOST: postgres
+      PGUSER: imaginfolio
+      PGDATABASE: imaginfolio
+      PGPASSWORD: imaginfolio
+      PGPOST: 5432
+      JWT_SECRET: "imaginfolio"
+      JWT_EXPIRES: 24h
+      BROKERS_LIST: kafka:9092
+      POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
+    volumes:
+      - ./TEMP:/app/UPLOAD_DATA
+    volumes:
+      - ./TEMP:/app/UPLOAD_DATA
+  consumer_imaginfolio_comment_post:
+    image: consumer_imaginfolio
+    depends_on:
+      - "kafka"
+    environment:
+      CLIENT_ID: imaginfolio
+      GROUP_ID: CONSUMER_COMMENT_POST
+      BROKERS_LIST: kafka:9092
+      TOPIC: COMMENT_POST
+      PGHOST: postgres
+      PGUSER: imaginfolio
+      PGDATABASE: imaginfolio
+      PGPASSWORD: imaginfolio
+      PGPOST: 5432
+      PG_QUERY_STR: CALL COMMENT($$1,$$2,$$3)
+  consumer_imaginfolio_like_post:
+    image: consumer_imaginfolio
+    depends_on:
+      - "kafka"
+    environment:
+      CLIENT_ID: imaginfolio
+      GROUP_ID: CONSUMER_LIKE_POST
+      BROKERS_LIST: kafka:9092
+      TOPIC: LIKE_POST
+      PGHOST: postgres
+      PGUSER: imaginfolio
+      PGDATABASE: imaginfolio
+      PGPASSWORD: imaginfolio
+      PGPOST: 5432
+      PG_QUERY_STR: CALL LIKE_POST($$1,$$2)
