@@ -38,3 +38,14 @@ exports.comment = async (postId, username, commentText) => {
     ],
   });
 };
+exports.createPost = async (post) => {
+  return producer.send({
+    topic: "CREATE_POST",
+    numPartitions: 3,
+    messages: [
+      {
+        value: JSON.stringify(post),
+      },
+    ],
+  });
+};

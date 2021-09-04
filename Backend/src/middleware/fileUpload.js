@@ -2,12 +2,12 @@ const path = require("path");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 exports.uploadFile = async (req, res, next) => {
-  const { file } = req.files;
+  const { files } = req.files || [];
   let fileValidation = true;
-  if (file.length > 0) {
+  if (files && files.length > 0) {
     fileList = [];
     const uploadDir = path.join(__dirname, "../../", "UPLOAD_DATA");
-    for (let tempFile of file) {
+    for (let tempFile of files) {
       let fileType = tempFile.type.split("/")[0];
       if (!(fileType === "image" || fileType === "video")) {
         fileValidation = false;
@@ -15,11 +15,10 @@ exports.uploadFile = async (req, res, next) => {
       }
       let filePath = path.join(
         uploadDir,
-        uuidv4(),
-        path.extname(tempFile.path)
+        uuidv4() + path.extname(tempFile.name)
       );
       fs.copyFileSync(tempFile.path, filePath);
-      fileList.push(filePath);
+      fileList.push(path.basename(filePath));
     }
     if (!fileValidation)
       return res

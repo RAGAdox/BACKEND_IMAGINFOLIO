@@ -31,7 +31,7 @@ services:
       - "$PWD/importPostgres:/data"
   lb:
     image: haproxy
-    depends_on: ["imaginfolio1","imaginfolio2","imaginfolio3","imaginfolio4"]
+    depends_on: ["imaginfolio1", "imaginfolio2", "imaginfolio3", "imaginfolio4"]
     ports:
       - "8080:8080"
     volumes:
@@ -51,7 +51,7 @@ services:
       BROKERS_LIST: kafka:9092
       POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
     volumes:
-      - ./TEMP:/app/UPLOAD_DATA
+      - ./UPLOAD_DATA:/app/UPLOAD_DATA
   imaginfolio2:
     image: imaginfolio
     depends_on: ["kafka"]
@@ -66,6 +66,8 @@ services:
       JWT_EXPIRES: 24h
       BROKERS_LIST: kafka:9092
       POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
+    volumes:
+      - ./UPLOAD_DATA:/app/UPLOAD_DATA
   imaginfolio3:
     image: imaginfolio
     depends_on: ["kafka"]
@@ -81,7 +83,7 @@ services:
       BROKERS_LIST: kafka:9092
       POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
     volumes:
-      - ./TEMP:/app/UPLOAD_DATA
+      - ./UPLOAD_DATA:/app/UPLOAD_DATA
   imaginfolio4:
     image: imaginfolio
     depends_on: ["kafka"]
@@ -97,9 +99,7 @@ services:
       BROKERS_LIST: kafka:9092
       POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
     volumes:
-      - ./TEMP:/app/UPLOAD_DATA
-    volumes:
-      - ./TEMP:/app/UPLOAD_DATA
+      - ./UPLOAD_DATA:/app/UPLOAD_DATA
   consumer_imaginfolio_comment_post:
     image: consumer_imaginfolio
     depends_on:
@@ -130,3 +130,18 @@ services:
       PGPASSWORD: imaginfolio
       PGPOST: 5432
       PG_QUERY_STR: CALL LIKE_POST($$1,$$2)
+  consumer_imaginfolio_create_post:
+    image: consumer_imaginfolio
+    depends_on:
+      - "kafka"
+    environment:
+      CLIENT_ID: imaginfolio
+      GROUP_ID: CONSUMER_CREATE_POST
+      BROKERS_LIST: kafka:9092
+      TOPIC: CREATE_POST
+      PGHOST: postgres
+      PGUSER: imaginfolio
+      PGDATABASE: imaginfolio
+      PGPASSWORD: imaginfolio
+      PGPOST: 5432
+      PG_QUERY_STR: INSERT INTO POSTS (USERNAME,POST_URL,CAPTION,TAGS) VALUES ($$1,$$2,$$3,$$4)

@@ -2,7 +2,7 @@ const formidable = require("formidable");
 const { validationCheck } = require("../utils/validations");
 const { getUser, getFeed } = require("../db/fetchData");
 const { savePost } = require("../db/saveData");
-const { likePost, comment } = require("../producers/post");
+const { likePost, comment, createPost } = require("../producers/post");
 exports.getUserFeed = async (req, res) => {
   const { username } = req.user;
   const limit = req.query.limit;
@@ -26,14 +26,46 @@ exports.getPostId = async (req, res, next, postId) => {
   };
   next();
 };
+exports.parseForm = async (req, res, next) => {
+  let form = new formidable.IncomingForm({
+    multiples: true,
+    keepExtensions: true,
+  });
+  form.parse(req, (err, fields, files) => {
+    if (!err) {
+      req.fields = fields;
+      req.files = files;
+      next();
+    } else {
+      return res
+        .status(400)
+        .json({ success: false, error: `Unable to parse data \n ${err}` });
+    }
+  });
+};
 exports.createPost = async (req, res) => {
+  const fileList = req.fileList;
+  let { caption, tags } = req.fields;
+  tags = tags ? tags.split(",") : [];
+  const post = {
+    username: req.user.username,
+    fileList,
+    caption,
+    tags,
+  };
+  let result = await createPost(post);
+  return res.json(result);
+};
+exports.createPostDb = async (req, res) => {
   const { caption } = req.fields;
+  let { tags } = req.fields;
+  tags = tags ? tags.split(",") : [];
   const fileList = req.fileList;
   const post = {
     post_url: fileList,
     caption: caption,
     username: req.user.username,
-    tags: [],
+    tags: tags,
   };
 
   let result = await savePost(post);

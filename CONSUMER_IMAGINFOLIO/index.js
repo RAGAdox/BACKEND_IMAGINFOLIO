@@ -5,6 +5,7 @@ const pool = new Pool();
 const clientId = process.env.CLIENT_ID || "imaginfolio";
 const groupId = process.env.GROUP_ID || "CONSUMER";
 const brokers = process.env.BROKERS_LIST.split(",") || ["192.168.0.10:9092"];
+console.log("brokers: ", brokers);
 const queryExecutor = (argv) => {
   return pool.query(process.env.PG_QUERY_STR, argv);
 };

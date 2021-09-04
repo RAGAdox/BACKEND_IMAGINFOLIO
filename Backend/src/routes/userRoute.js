@@ -6,13 +6,13 @@ const { isSignedIn, isAuthorized } = require("../controllers/auth");
 const { uploadFile } = require("../middleware/fileUpload");
 const {
   getUserByUsername,
+  parseForm,
   createPost,
   getUserFeed,
   getPostId,
   likePost,
   commentPost,
 } = require("../controllers/user");
-const { route } = require("./authRoute");
 router.param("username", getUserByUsername);
 router.param("postId", getPostId);
 router.get("/get-feed/:username", isSignedIn, isAuthorized, getUserFeed);
@@ -23,7 +23,7 @@ router.post(
   "/create-post/:username",
   isSignedIn,
   isAuthorized,
-  formidableMiddleware({ multiples: true }),
+  parseForm,
   uploadFile,
   createPost
 );
