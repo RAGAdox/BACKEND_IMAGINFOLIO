@@ -19,7 +19,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
   postgres:
-    image: postgres
+    image: postgres:13
     ports:
       - "5432:5432"
     environment:
@@ -50,6 +50,7 @@ services:
       JWT_EXPIRES: 24h
       BROKERS_LIST: kafka:9092
       POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
+      UPLOAD_PATH: "../../UPLOAD_DATA"
     volumes:
       - ./UPLOAD_DATA:/app/UPLOAD_DATA
   imaginfolio2:
@@ -66,6 +67,7 @@ services:
       JWT_EXPIRES: 24h
       BROKERS_LIST: kafka:9092
       POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
+      UPLOAD_PATH: "../../UPLOAD_DATA"
     volumes:
       - ./UPLOAD_DATA:/app/UPLOAD_DATA
   imaginfolio3:
@@ -82,6 +84,7 @@ services:
       JWT_EXPIRES: 24h
       BROKERS_LIST: kafka:9092
       POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
+      UPLOAD_PATH: "../../UPLOAD_DATA"
     volumes:
       - ./UPLOAD_DATA:/app/UPLOAD_DATA
   imaginfolio4:
@@ -98,6 +101,7 @@ services:
       JWT_EXPIRES: 24h
       BROKERS_LIST: kafka:9092
       POST_PRODUCER_CLIENT_ID: "post_producer_imaginfolio"
+      UPLOAD_PATH: "../../UPLOAD_DATA"
     volumes:
       - ./UPLOAD_DATA:/app/UPLOAD_DATA
   consumer_imaginfolio_comment_post:

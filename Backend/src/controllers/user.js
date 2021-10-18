@@ -3,6 +3,7 @@ const { validationCheck } = require("../utils/validations");
 const { getUser, getFeed } = require("../db/fetchData");
 const { savePost } = require("../db/saveData");
 const { likePost, comment, createPost } = require("../producers/post");
+const { IncomingForm } = require("formidable");
 exports.getUserFeed = async (req, res) => {
   const { username } = req.user;
   const limit = req.query.limit;
@@ -27,19 +28,18 @@ exports.getPostId = async (req, res, next, postId) => {
   next();
 };
 exports.parseForm = async (req, res, next) => {
-  let form = new formidable.IncomingForm({
-    multiples: true,
-    keepExtensions: true,
-  });
+  let form = new formidable.IncomingForm();
+  form.keepExtentions = true;
+  form.multiples = true;
   form.parse(req, (err, fields, files) => {
-    if (!err) {
-      req.fields = fields;
-      req.files = files;
-      next();
-    } else {
+    if (err)
       return res
         .status(400)
-        .json({ success: false, error: `Unable to parse data \n ${err}` });
+        .json({ success: false, error: "Unable to Parse Form" });
+    else {
+      req.files = files;
+      req.fields = fields;
+      next();
     }
   });
 };
