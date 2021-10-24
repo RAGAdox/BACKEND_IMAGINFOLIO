@@ -1,4 +1,5 @@
-const formidable = require("formidable");
+require("dotenv").config();
+const path = require("path");
 const { validationCheck } = require("../utils/validations");
 const { getUser, getFeed } = require("../db/fetchData");
 const { savePost } = require("../db/saveData");
@@ -28,14 +29,26 @@ exports.getPostId = async (req, res, next, postId) => {
   next();
 };
 exports.parseForm = async (req, res, next) => {
-  let form = new formidable.IncomingForm();
-  form.keepExtentions = true;
-  form.multiples = true;
+  fileType = ["image"];
+  let form = new IncomingForm({
+    keepExtensions: true,
+    multiples: true,
+    uploadDir: path.join(__dirname, process.env.UPLOAD_PATH),
+  });
+  form.onPart = (part) => {
+    const { filename, mime } = part;
+    if (filename && fileType.indexOf(mime.split("/")[0]) === -1) {
+      form._error(new Error("File Type Not Supported"));
+    }
+    if (!filename || fileType.indexOf(mime.split("/")[0]) !== -1) {
+      form.handlePart(part);
+    }
+  };
   form.parse(req, (err, fields, files) => {
     if (err)
       return res
         .status(400)
-        .json({ success: false, error: "Unable to Parse Form" });
+        .json({ success: false, error: "Unable to Parse Form" + err });
     else {
       req.files = files;
       req.fields = fields;
@@ -47,6 +60,7 @@ exports.createPost = async (req, res) => {
   const fileList = req.fileList;
   let { caption, tags } = req.fields;
   tags = tags ? tags.split(",") : [];
+  console.log(`File List =>`, fileList);
   const post = {
     username: req.user.username,
     fileList,

@@ -3,7 +3,7 @@ const formidableMiddleware = require("express-formidable");
 const { check, validationResult } = require("express-validator");
 const router = express.Router();
 const { isSignedIn, isAuthorized } = require("../controllers/auth");
-const { uploadFile } = require("../middleware/fileUpload");
+const { uploadFile, uploadFileKafka } = require("../middleware/fileUpload");
 const {
   getUserByUsername,
   parseForm,
@@ -24,7 +24,7 @@ router.post(
   isSignedIn,
   isAuthorized,
   parseForm,
-  uploadFile,
+  uploadFileKafka,
   createPost
 );
 router.get("/likePost/:username/:postId", isSignedIn, isAuthorized, likePost);

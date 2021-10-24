@@ -2,6 +2,7 @@ require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
+const { uploadFiles } = require("../producers/post");
 exports.uploadFile = async (req, res, next) => {
   let { files } = req.files || [];
   let fileValidation = true;
@@ -30,4 +31,8 @@ exports.uploadFile = async (req, res, next) => {
     return next();
   }
   return res.json({ success: false, error: "Cannot create an empty post" });
+};
+
+exports.uploadFileKafka = (req, res, next) => {
+  uploadFiles(req, res, next);
 };

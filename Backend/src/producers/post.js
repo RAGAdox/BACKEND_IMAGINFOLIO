@@ -49,3 +49,24 @@ exports.createPost = async (post) => {
     ],
   });
 };
+exports.uploadFiles = async (req, res, next) => {
+  let { files } = req.files || [];
+  req.fileList = [];
+  if (files && typeof files.length === "undefined") files = [files];
+  if (files && files.length > 0) {
+    let messages = [];
+    files.forEach(({ path }) => {
+      const filename = path.substring(path.lastIndexOf("/") + 1);
+      req.fileList.push(filename);
+      messages.push({ value: JSON.stringify(filename) });
+    });
+    producer.send({
+      topic: "UPLOAD_FILE",
+      numPartitions: 3,
+      messages: messages,
+    });
+    next();
+  } else {
+    return res.status(400).json({ success: false, error: `Empty Files` });
+  }
+};
