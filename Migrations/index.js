@@ -32,6 +32,7 @@ const bootstrap = async () => {
   await setupSchema();
   await migratePublicSchema();
   await seedSchema();
+  process.exit();
 };
 
 const runCompleteFlow = async () => {
