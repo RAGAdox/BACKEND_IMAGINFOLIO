@@ -1,0 +1,22 @@
+{
+  "name": "migrations",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate": "node -e 'require(\".\").migratePublicSchema()'",
+    "setup":"node index.js",
+    "bootstrap": "node -e 'require(\".\").bootstrap()'"
+
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.7.3",
+    "pino": "^7.11.0",
+    "pino-std-serializers": "^5.2.0",
+    "postgrator": "^4.1.1",
+    "sequelize": "^6.19.2"
+  }
+}

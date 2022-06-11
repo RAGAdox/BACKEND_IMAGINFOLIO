@@ -15,7 +15,7 @@ exports.getUserFeed = async (req, res) => {
 exports.getUserByUsername = async (req, res, next, username) => {
   const user = await getUser(username).catch((err) =>
     res.json({
-      error: `Could not find ${username} in database + ${err}`,
+      error: `Could not find ${username} in database`,
       success: false,
     })
   );
@@ -29,7 +29,7 @@ exports.getPostId = async (req, res, next, postId) => {
   next();
 };
 exports.parseForm = async (req, res, next) => {
-  fileType = ["image"];
+  const fileType = ["image"];
   let form = new IncomingForm({
     keepExtensions: true,
     multiples: true,
@@ -48,7 +48,7 @@ exports.parseForm = async (req, res, next) => {
     if (err)
       return res
         .status(400)
-        .json({ success: false, error: "Unable to Parse Form" + err });
+        .json({ success: false, error: "Unable to Parse Form", debug: err });
     else {
       req.files = files;
       req.fields = fields;
@@ -60,41 +60,22 @@ exports.createPost = async (req, res) => {
   const fileList = req.fileList;
   let { caption, tags } = req.fields;
   tags = tags ? tags.split(",") : [];
-  console.log(`File List =>`, fileList);
   const post = {
     username: req.user.username,
     fileList,
     caption,
     tags,
   };
-  let result = await createPost(post);
-  return res.json(result);
-};
-exports.createPostDb = async (req, res) => {
-  const { caption } = req.fields;
-  let { tags } = req.fields;
-  tags = tags ? tags.split(",") : [];
-  const fileList = req.fileList;
-  const post = {
-    post_url: fileList,
-    caption: caption,
-    username: req.user.username,
-    tags: tags,
-  };
-
-  let result = await savePost(post);
-  return res.send(result);
+  return createPost(post, res);
 };
 exports.likePost = async (req, res) => {
   const { username } = req.user;
   const { postId } = req.post;
-  let result = await likePost(postId, username);
-  return res.json(result);
+  return likePost(postId, username, res);
 };
 exports.commentPost = async (req, res) => {
   const { username } = req.user;
   const { postId } = req.post;
   const { commentText } = req.body;
-  let result = await comment(postId, username, commentText);
-  return res.json(result);
+  return comment(postId, username, commentText, res);
 };

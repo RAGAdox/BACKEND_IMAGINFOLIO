@@ -27,8 +27,9 @@ services:
       POSTGRES_USER: imaginfolio
       POSTGRES_DB: imaginfolio
     volumes:
-      - "$PWD/postgresData/imaginfolio:/var/lib/postgresql/data"
-      - "$PWD/importPostgres:/data"
+      - /var/lib/postgresql/data
+      - $PWD/importPostgres:/data
+      - $PWD/export:/export
   lb:
     image: haproxy
     depends_on: ["imaginfolio1", "imaginfolio2", "imaginfolio3", "imaginfolio4"]

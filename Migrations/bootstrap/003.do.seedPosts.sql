@@ -1,0 +1,1 @@
+COPY POSTS(username,post_url,tags) FROM '/data/post_sample.csv' DELIMITER ',' CSV HEADER;

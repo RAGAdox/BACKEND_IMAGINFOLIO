@@ -1,53 +1,73 @@
 require("dotenv").config();
-const { Kafka } = require("kafkajs");
-const clientId = process.env.POST_PRODUCER_CLIENT_ID || "imaginfolio";
-const brokers = process.env.BROKERS_LIST.split(",");
-console.log("BROKER LIST => ", brokers);
-const kafka = new Kafka({
-  clientId: clientId,
-  brokers: brokers,
-  connectionTimeout: 3000,
-  requestTimeout: 25000,
-});
-
-const producer = kafka.producer();
-producer.connect();
-exports.likePost = async (postId, username) => {
-  return producer.send({
-    topic: "LIKE_POST",
-    numPartitions: 3,
-    messages: [
+const producer = require("./producer");
+exports.likePost = async (postId, username, res) => {
+  return producer.send(
+    [
       {
-        value: JSON.stringify({ postId: postId, username: username }),
+        topic: "LIKE_POST",
+        messages: JSON.stringify({ postId: postId, username: username }),
       },
     ],
-  });
+    (err, data) => {
+      if (err || !data) {
+        return res.status(502).json({
+          success: false,
+          error: err,
+          message: `Unable to process like operation`,
+        });
+      }
+      return res.json({
+        success: true,
+        message: `Operation Successfull`,
+      });
+    }
+  );
 };
-exports.comment = async (postId, username, commentText) => {
-  return producer.send({
-    topic: "COMMENT_POST",
-    numPartitions: 3,
-    messages: [
+
+exports.comment = async (postId, username, commentText, res) => {
+  return producer.send(
+    [
       {
-        value: JSON.stringify({
+        topic: "COMMENT_POST",
+        messages: JSON.stringify({
           postId: postId,
           username: username,
           commentText: commentText,
         }),
       },
     ],
-  });
+    (err, data) => {
+      if (err || !data) {
+        return res.status(502).json({
+          success: false,
+          error: err,
+          message: `Unable to process comment operation`,
+        });
+      }
+      return res.json({
+        success: true,
+        message: `Operation Successfull`,
+      });
+    }
+  );
 };
-exports.createPost = async (post) => {
-  return producer.send({
-    topic: "CREATE_POST",
-    numPartitions: 3,
-    messages: [
-      {
-        value: JSON.stringify(post),
-      },
-    ],
-  });
+exports.createPost = async (post, res) => {
+  return producer.send(
+    [{ topic: "CREATE_POST", messages: JSON.stringify(post) }],
+    (err, data) => {
+      if (err || !data) {
+        return res.status(502).json({
+          success: false,
+          error: err,
+          message: `Unable to process create post operation`,
+        });
+      }
+      return res.json({
+        success: true,
+        message: `Operation Successfull`,
+      });
+    }
+  );
 };
 exports.uploadFiles = async (req, res, next) => {
   let { files } = req.files || [];
@@ -58,14 +78,22 @@ exports.uploadFiles = async (req, res, next) => {
     files.forEach(({ path }) => {
       const filename = path.substring(path.lastIndexOf("/") + 1);
       req.fileList.push(filename);
-      messages.push({ value: JSON.stringify(filename) });
+      messages.push(filename);
     });
-    producer.send({
-      topic: "UPLOAD_FILE",
-      numPartitions: 3,
-      messages: messages,
-    });
-    next();
+
+    producer.send(
+      [{ topic: "UPLOAD_FILE", messages: messages }],
+      (err, data) => {
+        if (err || !data) {
+          return res.status(502).json({
+            success: false,
+            error: err,
+            message: `Unable to process create post operation`,
+          });
+        }
+        next();
+      }
+    );
   } else {
     return res.status(400).json({ success: false, error: `Empty Files` });
   }

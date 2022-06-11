@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^10.0.0",
+    "kafka-node": "^5.0.0",
     "kafkajs": "^1.15.0"
   }
 }

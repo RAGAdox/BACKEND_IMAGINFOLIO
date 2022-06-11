@@ -21,7 +21,7 @@ router.post(
 );
 router.post(
   "/login",
-  [check("username").isString(), check("password").isStrongPassword()],
+  [check("username").isString(), check("password").isString()],
   signIn
 );
 router.get("/protected_route", isSignedIn, (req, res) => {

@@ -1,0 +1,1 @@
+COPY USERS(username,password_hash,full_name,email_id) FROM '/data/user_sample.csv' DELIMITER ',' CSV HEADER;
