@@ -1,0 +1,1 @@
+insert into follow_relations (follower_id,followee_id)  ((select u1.username ,u2.username  from users u1,users u2 where u1.username <>u2.username order by random() limit 2000));
