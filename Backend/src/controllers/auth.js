@@ -6,6 +6,7 @@ const { getCredentials } = require("../db/fetchData");
 const { validationCheck } = require("../utils/validations");
 exports.createUser = async (req, res) => {
   const { username, password, email, fullname } = req.body;
+  console.log(username, password);
   if (validationCheck(req, res)) {
     const hashString = bcrypt.hashSync(password, 10);
     const result = await saveUser(username, hashString, email, fullname);
@@ -13,7 +14,6 @@ exports.createUser = async (req, res) => {
       return res.status(422).json({
         success: false,
         message: result.error,
-        debug: result.debug.detail,
       });
     return res.json({ success: true, message: "User successfully created" });
   }

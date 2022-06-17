@@ -5,6 +5,19 @@ const { createUser, signIn, isSignedIn } = require("../controllers/auth");
 router.post(
   "/signup",
   [
+    check("fullname", "Full Name is a required field")
+      .isString()
+      .not()
+      .isEmpty(),
+    check("username", "Username is a required field")
+      .isString()
+      .not()
+      .isEmpty(),
+    check("email", "Email is a required field").isString().not().isEmpty(),
+    check("password", "Password is a required field")
+      .isString()
+      .not()
+      .isEmpty(),
     check(
       "username",
       "username must be atleast 3 characters or at max 32 characters long"
